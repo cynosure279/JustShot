@@ -12,7 +12,7 @@
 #include <justcapture/justcapture.h>
 
 gboolean
-cli_parse_args (GApplication *app, int argc, char *argv[], CliOptions *opts)
+cli_parse_args (GApplication *app G_GNUC_UNUSED, int argc, char *argv[], CliOptions *opts)
 {
   GOptionEntry entries[] = {
     { "target", 't', 0, G_OPTION_ARG_INT, &opts->target,
@@ -75,7 +75,7 @@ cli_capture_data_free (CliCaptureData *data)
 }
 
 static void
-on_cli_export_done (GObject *source, GAsyncResult *result, gpointer user_data)
+on_cli_export_done (GObject *source G_GNUC_UNUSED, GAsyncResult *result, gpointer user_data)
 {
   GTask *task = G_TASK (user_data);
   GError *error = NULL;

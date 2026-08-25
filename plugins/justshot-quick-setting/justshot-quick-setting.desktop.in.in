@@ -4,3 +4,4 @@ Name=Screenshot
 Types=quick-setting;
 Comment=Take a screenshot
 Plugin=@plugins_dir@/libphosh-plugin-justshot-quick-setting.so
+Icon=camera-photo-symbolic

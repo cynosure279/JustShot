@@ -21,5 +21,12 @@ adw_dep = dependency('libadwaita-1', version: '>= 1.6')
 
 cc = meson.get_compiler('c')
 subdir('src/')
-subdir('plugins/justshot-quick-setting')
-subdir('tests/')
+
+# The phosh plugin is built only when explicitly enabled and phosh deps are available
+if get_option('phosh-plugin')
+  subdir('plugins/justshot-quick-setting')
+endif
+
+if get_option('tests')
+  subdir('tests/')
+endif

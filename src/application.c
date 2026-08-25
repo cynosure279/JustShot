@@ -71,7 +71,7 @@ take_screenshot_phosh (GApplication *app)
 {
   g_application_hold (app);
 
-  GDBusConnection *conn = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, NULL);
+  g_autoptr(GDBusConnection) conn = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, NULL);
   if (!conn)
     {
       g_warning ("Cannot connect to session bus");
@@ -93,8 +93,6 @@ take_screenshot_phosh (GApplication *app)
       NULL,
       on_phosh_screenshot_done,
       app);
-
-  g_object_unref (conn);
 }
 
 struct _JustShotApplication {
@@ -165,8 +163,8 @@ just_shot_application_activate (GApplication *app)
 }
 
 static void
-capture_default_action (GSimpleAction *action,
-                        GVariant      *parameter,
+capture_default_action (GSimpleAction *action G_GNUC_UNUSED,
+                        GVariant      *parameter G_GNUC_UNUSED,
                         gpointer       user_data)
 {
   JustShotApplication *self = JUST_SHOT_APPLICATION (user_data);
@@ -186,8 +184,8 @@ capture_default_action (GSimpleAction *action,
 }
 
 static void
-capture_screen_action (GSimpleAction *action,
-                       GVariant      *parameter,
+capture_screen_action (GSimpleAction *action G_GNUC_UNUSED,
+                       GVariant      *parameter G_GNUC_UNUSED,
                        gpointer       user_data)
 {
   JustShotApplication *self = JUST_SHOT_APPLICATION (user_data);
@@ -197,8 +195,8 @@ capture_screen_action (GSimpleAction *action,
 }
 
 static void
-capture_window_action (GSimpleAction *action,
-                       GVariant      *parameter,
+capture_window_action (GSimpleAction *action G_GNUC_UNUSED,
+                       GVariant      *parameter G_GNUC_UNUSED,
                        gpointer       user_data)
 {
   JustShotApplication *self = JUST_SHOT_APPLICATION (user_data);
@@ -208,8 +206,8 @@ capture_window_action (GSimpleAction *action,
 }
 
 static void
-capture_area_action (GSimpleAction *action,
-                     GVariant      *parameter,
+capture_area_action (GSimpleAction *action G_GNUC_UNUSED,
+                     GVariant      *parameter G_GNUC_UNUSED,
                      gpointer       user_data)
 {
   JustShotApplication *self = JUST_SHOT_APPLICATION (user_data);
@@ -219,8 +217,8 @@ capture_area_action (GSimpleAction *action,
 }
 
 static void
-capture_active_window_action (GSimpleAction *action,
-                              GVariant      *parameter,
+capture_active_window_action (GSimpleAction *action G_GNUC_UNUSED,
+                              GVariant      *parameter G_GNUC_UNUSED,
                               gpointer       user_data)
 {
   JustShotApplication *self = JUST_SHOT_APPLICATION (user_data);
@@ -230,8 +228,8 @@ capture_active_window_action (GSimpleAction *action,
 }
 
 static void
-capture_delay_action (GSimpleAction *action,
-                      GVariant      *parameter,
+capture_delay_action (GSimpleAction *action G_GNUC_UNUSED,
+                      GVariant      *parameter G_GNUC_UNUSED,
                       gpointer       user_data)
 {
   /* TODO: implement delay */

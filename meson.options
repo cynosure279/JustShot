@@ -1,1 +1,2 @@
 option('phosh-plugin', type: 'boolean', value: false, description: 'Build Phosh quick setting plugin')
+option('tests', type: 'boolean', value: true, description: 'Build and run tests')

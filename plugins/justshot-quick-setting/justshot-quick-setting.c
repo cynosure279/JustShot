@@ -5,7 +5,7 @@
 #include "justshot-quick-setting.h"
 #include <gio/gio.h>
 
-#define JUST_SHOT_BIN "/usr/local/bin/justshot"
+/* justshot binary path — searched at runtime, not hardcoded */
 
 /* Row types */
 enum {
@@ -174,10 +174,17 @@ on_capture_clicked (JustshotQuickSetting *self)
 {
   g_autoptr(GError) error = NULL;
   g_autofree gchar *delay_str = g_strdup_printf ("%u", self->selected_delay);
+  g_autofree gchar *justshot_path = g_find_program_in_path ("justshot");
+
+  if (!justshot_path)
+    {
+      g_warning ("justshot binary not found in PATH");
+      return;
+    }
 
   /* Build argv: justshot --delay N [--area] */
   GPtrArray *argv = g_ptr_array_new ();
-  g_ptr_array_add (argv, g_strdup (JUST_SHOT_BIN));
+  g_ptr_array_add (argv, g_steal_pointer (&justshot_path));
   if (self->selected_delay > 0)
     {
       g_ptr_array_add (argv, g_strdup ("--delay"));

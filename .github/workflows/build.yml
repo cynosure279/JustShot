@@ -1,20 +1,18 @@
 # GitHub Actions CI/CD for JustShot
 #
-# Builds both the justshot binary and the phosh quick-setting plugin.
-# phosh is built from source because libphosh-0.45.pc is not shipped
-# on stock Arch (bindings-lib defaults to false).
+# Job 1: Build the justshot binary (needs libjustcapture subproject from GitHub).
+# Job 2: Build the phosh quick-setting plugin (needs phosh with -Dbindings-lib=true).
 #
 name: Build JustShot
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
-  # ── Job 1: Build justshot binary ──────────────────────────────────
   build-binary:
     name: Build justshot binary
     runs-on: ubuntu-latest
@@ -31,11 +29,11 @@ jobs:
         run: |
           pacman -Syu --noconfirm
           pacman -S --noconfirm meson ninja gcc pkg-config git \
-            glib2 gdk-pixbuf2 gtk4 libadwaita
+            glib2 gdk-pixbuf2 gtk4 libadwaita cairo
 
       - name: Build justshot
         run: |
-          meson setup builddir -Dtests=false
+          meson setup builddir -Dtests=false -Dphosh-plugin=false
           ninja -C builddir
 
       - name: Upload binary
@@ -45,7 +43,6 @@ jobs:
           path: builddir/src/justshot
           if-no-files-found: error
 
-  # ── Job 2: Build phosh plugin ─────────────────────────────────────
   build-plugin:
     name: Build phosh plugin
     runs-on: ubuntu-latest
@@ -58,28 +55,37 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Install base dependencies
+      - name: Build phosh plugin
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm meson ninja gcc pkg-config git \
-            glib2 gtk3 libhandy1 wayland-protocols wayland \
-            systemd-libs dbus feedbackd libgudev gcr-3 upower \
-            json-glib libgmobile networkmanager \
-            mobile-broadband-provider-info libsoup3 gsound \
-            nm-connection-editor gtk-doc
-
-      - name: Build phosh from source
-        run: |
-          git clone --depth=1 https://gitlab.gnome.org/World/Phosh/phosh.git /tmp/phosh
+          pacman -S --noconfirm meson ninja gcc pkg-config git cmake \
+            glib2 glib2-devel gtk3 gtk4 libhandy libadwaita \
+            wayland wayland-protocols libxkbcommon \
+            libgudev networkmanager libpulse upower libsoup3 \
+            gnome-desktop feedbackd libgmobile json-glib \
+            modemmanager polkit libsecret gcr gnome-bluetooth-3.0 \
+            fribidi systemd-libs appstream evolution-data-server \
+            qrcodegen libical gsettings-desktop-schemas \
+            python-docutils cairo pango gdk-pixbuf2 dconf \
+            callaudiod libsysprof-capture \
+            gobject-introspection gobject-introspection-runtime \
+            evince
+          # Clone and build phosh with bindings-lib=true
+          git clone --depth 1 --branch v0.57.0 https://gitlab.gnome.org/World/Phosh/phosh.git /tmp/phosh
+          git clone --depth 1 --branch v0.1.5 https://gitlab.gnome.org/World/Phosh/libcall-ui.git /tmp/phosh/subprojects/libcall-ui
+          git clone --depth 1 https://gitlab.gnome.org/guidog/libgnome-volume-control.git /tmp/phosh/subprojects/gvc
           cd /tmp/phosh
-          meson setup builddir --prefix=/usr -Dbindings-lib=true -Dtests=false
+          # Apply libical-4 compatibility patch
+          curl -sL 'https://gitlab.archlinux.org/archlinux/packaging/packages/phosh/-/raw/main/libical-4.patch' | patch -p1
+          meson setup builddir --prefix=/usr --libdir=lib --libexecdir=lib/phosh \
+            -Dbindings-lib=true -Dtests=false -Dphoc_tests=disabled -Dtools=false \
+            -Dman=false -Dgtk_doc=false -Dintrospection=false -Dvapi=false \
+            -Dcallui-i18n=false -Dsearchd=false
           ninja -C builddir
           ninja -C builddir install
-
-      - name: Build plugin
-        run: |
-          cd plugins/justshot-quick-setting
-          meson setup builddir --prefix=/usr
+          # Build the plugin
+          cd $GITHUB_WORKSPACE/plugins/justshot-quick-setting
+          meson setup builddir --prefix=/usr --libdir=lib
           ninja -C builddir
 
       - name: Upload plugin
@@ -89,9 +95,8 @@ jobs:
           path: |
             plugins/justshot-quick-setting/builddir/*.so
             plugins/justshot-quick-setting/builddir/*.plugin
-          if-no-files-found: warn
+          if-no-files-found: error
 
-  # ── Job 3: Release on tag ─────────────────────────────────────────
   release:
     needs: [build-binary, build-plugin]
     if: startsWith(github.ref, 'refs/tags/v')

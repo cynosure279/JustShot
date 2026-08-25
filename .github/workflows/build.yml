@@ -58,7 +58,7 @@ jobs:
       - name: Build phosh plugin
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm meson ninja gcc pkg-config git cmake \
+          pacman -S --noconfirm meson ninja gcc pkg-config git cmake patch \
             glib2 glib2-devel gtk3 gtk4 libhandy libadwaita \
             wayland wayland-protocols libxkbcommon \
             libgudev networkmanager libpulse upower libsoup3 \

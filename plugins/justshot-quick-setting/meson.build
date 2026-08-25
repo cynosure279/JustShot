@@ -1,3 +1,9 @@
+project('phosh-plugin-justshot', 'c',
+  version: '0.1.0',
+  meson_version: '>= 1.0.0',
+  default_options: ['warning_level=1', 'c_std=gnu11'],
+)
+
 gnome = import('gnome')
 
 gio_dep = dependency('gio-2.0')

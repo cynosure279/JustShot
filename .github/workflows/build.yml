@@ -1,0 +1,82 @@
+# GitHub Actions CI/CD for JustShot
+name: Build JustShot
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-binary:
+    name: Build justshot binary
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --user root
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install dependencies
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm meson ninja gcc pkg-config git             glib2 gdk-pixbuf2 gtk4 libadwaita
+
+      - name: Build
+        run: |
+          meson setup builddir -Dtests=false
+          ninja -C builddir
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: justshot-binary
+          path: builddir/src/justshot
+          if-no-files-found: error
+
+  build-plugin:
+    name: Build phosh plugin
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --user root
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install dependencies
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm meson ninja gcc pkg-config git             glib2 gtk3 libhandy1 wayland-protocols             wayland systemd-libs dbus
+
+      - name: Build phosh from source
+        run: |
+          git clone --depth=1 https://gitlab.gnome.org/World/Phosh/phosh.git /tmp/phosh
+          cd /tmp/phosh
+          # Install phosh build deps
+          pacman -S --noconfirm feedbackd libcall-ui libgudev             gcr-3 upower json-glib libgmobile networkmanager             mobile-broadband-provider-info nm-connection-editor             libsoup3 gsound glib2-devel gtk3-devel
+          meson setup builddir --prefix=/usr -Dbindings-lib=true
+          ninja -C builddir
+          ninja -C builddir install
+
+      - name: Build plugin
+        run: |
+          cd plugins/justshot-quick-setting
+          # The plugin needs phosh-plugins pkg-config and libphosh
+          meson setup builddir --prefix=/usr
+          ninja -C builddir
+
+      - name: Upload plugin
+        uses: actions/upload-artifact@v4
+        with:
+          name: justshot-plugin
+          path: |
+            plugins/justshot-quick-setting/builddir/*.so
+            plugins/justshot-quick-setting/builddir/*.plugin
+          if-no-files-found: warn

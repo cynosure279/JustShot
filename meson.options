@@ -1,0 +1,1 @@
+option('phosh-plugin', type: 'boolean', value: false, description: 'Build Phosh quick setting plugin')

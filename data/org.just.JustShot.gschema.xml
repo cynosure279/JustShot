@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.just.JustShot" path="/org/just/justshot/">
+    <key name="default-format" type="s">
+      <default>'png'</default>
+      <summary>Default output format</summary>
+      <description>The default image format for screenshots.</description>
+    </key>
+    <key name="default-target" type="u">
+      <default>1</default>
+      <summary>Default capture target</summary>
+      <description>1=Screen, 2=Window, 4=Area, 8=Active Window</description>
+    </key>
+    <key name="include-pointer" type="b">
+      <default>true</default>
+      <summary>Include pointer in screenshot</summary>
+      <description>Whether to include the mouse pointer in screenshots.</description>
+    </key>
+    <key name="save-directory" type="s">
+      <default>''</default>
+      <summary>Custom save directory</summary>
+      <description>Custom directory for saving screenshots. Empty uses the default Pictures/Screenshots/.</description>
+    </key>
+    <key name="capture-delay" type="u">
+      <default>0</default>
+      <summary>Capture delay in seconds</summary>
+      <description>Delay before taking screenshot (0=immediate, 1, 3, 10).</description>
+    </key>
+  </schema>
+</schemalist>

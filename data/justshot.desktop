@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=JustShot
+Comment=Screenshot capture tool
+Exec=justshot
+Icon=applets-screenshooter
+Terminal=false
+Categories=Graphics;Utility;
+StartupNotify=true
+X-GNOME-UsesNotifications=true

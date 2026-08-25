@@ -1,0 +1,21 @@
+# Build artifacts
+builddir/
+build/
+*.o
+*.so
+*.so.*
+*.a
+
+# Subprojects (vendored locally, use wrap in CI)
+subprojects/libjustcapture/
+subprojects/.wraplock
+
+# IDE
+.vscode/
+.idea/
+*~
+*.swp
+*.swo
+
+# Generated
+compile_commands.json

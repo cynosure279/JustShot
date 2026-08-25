@@ -1,4 +1,9 @@
 # GitHub Actions CI/CD for JustShot
+#
+# Builds both the justshot binary and the phosh quick-setting plugin.
+# phosh is built from source because libphosh-0.45.pc is not shipped
+# on stock Arch (bindings-lib defaults to false).
+#
 name: Build JustShot
 
 on:
@@ -9,6 +14,7 @@ on:
   workflow_dispatch:
 
 jobs:
+  # ── Job 1: Build justshot binary ──────────────────────────────────
   build-binary:
     name: Build justshot binary
     runs-on: ubuntu-latest
@@ -24,9 +30,10 @@ jobs:
       - name: Install dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm meson ninja gcc pkg-config git             glib2 gdk-pixbuf2 gtk4 libadwaita
+          pacman -S --noconfirm meson ninja gcc pkg-config git \
+            glib2 gdk-pixbuf2 gtk4 libadwaita
 
-      - name: Build
+      - name: Build justshot
         run: |
           meson setup builddir -Dtests=false
           ninja -C builddir
@@ -38,6 +45,7 @@ jobs:
           path: builddir/src/justshot
           if-no-files-found: error
 
+  # ── Job 2: Build phosh plugin ─────────────────────────────────────
   build-plugin:
     name: Build phosh plugin
     runs-on: ubuntu-latest
@@ -50,25 +58,27 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Install dependencies
+      - name: Install base dependencies
         run: |
           pacman -Syu --noconfirm
-          pacman -S --noconfirm meson ninja gcc pkg-config git             glib2 gtk3 libhandy1 wayland-protocols             wayland systemd-libs dbus
+          pacman -S --noconfirm meson ninja gcc pkg-config git \
+            glib2 gtk3 libhandy1 wayland-protocols wayland \
+            systemd-libs dbus feedbackd libgudev gcr-3 upower \
+            json-glib libgmobile networkmanager \
+            mobile-broadband-provider-info libsoup3 gsound \
+            nm-connection-editor gtk-doc
 
       - name: Build phosh from source
         run: |
           git clone --depth=1 https://gitlab.gnome.org/World/Phosh/phosh.git /tmp/phosh
           cd /tmp/phosh
-          # Install phosh build deps
-          pacman -S --noconfirm feedbackd libcall-ui libgudev             gcr-3 upower json-glib libgmobile networkmanager             mobile-broadband-provider-info nm-connection-editor             libsoup3 gsound glib2-devel gtk3-devel
-          meson setup builddir --prefix=/usr -Dbindings-lib=true
+          meson setup builddir --prefix=/usr -Dbindings-lib=true -Dtests=false
           ninja -C builddir
           ninja -C builddir install
 
       - name: Build plugin
         run: |
           cd plugins/justshot-quick-setting
-          # The plugin needs phosh-plugins pkg-config and libphosh
           meson setup builddir --prefix=/usr
           ninja -C builddir
 
@@ -80,3 +90,22 @@ jobs:
             plugins/justshot-quick-setting/builddir/*.so
             plugins/justshot-quick-setting/builddir/*.plugin
           if-no-files-found: warn
+
+  # ── Job 3: Release on tag ─────────────────────────────────────────
+  release:
+    needs: [build-binary, build-plugin]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

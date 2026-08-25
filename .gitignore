@@ -6,9 +6,10 @@ build/
 *.so.*
 *.a
 
-# Subprojects (vendored locally, use wrap in CI)
+# Subprojects (downloaded via wrap, not committed)
 subprojects/libjustcapture/
 subprojects/.wraplock
+subprojects/packagecache/
 
 # IDE
 .vscode/

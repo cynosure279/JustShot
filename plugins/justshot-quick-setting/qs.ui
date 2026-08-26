@@ -14,7 +14,7 @@
   </object>
   <object class="PhoshStatusPage" id="status_page">
     <property name="visible">1</property>
-    <property name="title" translatable="yes">截图设置</property>
+    <property name="title" translatable="yes">Screenshot Settings</property>
     <property name="content">list_box</property>
     <property name="footer">btn_capture</property>
   </object>
@@ -22,7 +22,6 @@
     <property name="visible">1</property>
     <property name="selection-mode">none</property>
     <property name="hexpand">1</property>
-    <property name="halign">fill</property>
     <signal name="row-activated" handler="on_row_activated" object="JustshotQuickSetting" swapped="yes"/>
     <style>
       <class name="content"/>
@@ -36,7 +35,7 @@
     <child>
       <object class="GtkLabel" id="btn_label">
         <property name="visible">1</property>
-        <property name="label" translatable="yes">📸 截图</property>
+        <property name="label" translatable="yes">Screenshot</property>
       </object>
     </child>
   </object>

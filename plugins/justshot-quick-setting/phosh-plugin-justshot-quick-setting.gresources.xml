@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <gresources>
-  <gresource prefix="/org/just/justshot/plugins/justshot-quick-setting">
-    <file>qs.ui</file>
+  <gresource prefix="/mobi/phosh/plugins/justshot-quick-setting/">
+    <file preprocess="xml-stripblanks">qs.ui</file>
   </gresource>
 </gresources>

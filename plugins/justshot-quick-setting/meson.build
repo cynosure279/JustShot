@@ -23,7 +23,7 @@ resources = gnome.compile_resources('phosh-plugin-justshot-resources',
   c_name: 'phosh_plugin_justshot',
 )
 
-shared_module('phosh-plugin-justshot',
+shared_module('phosh-plugin-justshot-quick-setting',
   files('phosh-plugin-justshot-quick-setting.c', 'justshot-quick-setting.c'),
   resources,
   c_args: [
